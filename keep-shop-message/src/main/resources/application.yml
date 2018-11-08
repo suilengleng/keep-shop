@@ -1,0 +1,42 @@
+server:
+  port: 8763
+  context-path: /nessage
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+spring:
+  application:
+    name: message
+  redis:
+      host: 127.0.0.1
+      password: root
+      port: 6379
+      pool:
+        max-idle: 100
+        min-idle: 1
+        max-active: 1000
+        max-wait: -1
+  activemq:
+      broker-url: tcp://localhost:61616
+      in-memory: true
+      pool:
+        enabled: false
+  mail:
+    host: smtp.163.com
+    username: gslengleng@163.com
+    password: gslengleng163
+    enable:  true
+    smtp:
+      auth: true
+    starttls:
+      enable: true
+      required: true
+
+########################################
+
+msg:
+  subject: 科派网络工作室提示您，会员注册成功邮件。
+  text:  恭喜您的账户{},注册成功!科派网络工作室,浙江省嘉兴市嘉善县
+messages:
+  queue: messages_queue

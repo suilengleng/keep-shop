@@ -13,5 +13,5 @@ public interface MemberService {
     ResponseBase login(@RequestBody UserEntity user);
     //使用token来查找用户信息
     @RequestMapping("/findByTokenMember")
-    ResponseBase findByTokenMember(String token);
+    ResponseBase findByTokenMember(@RequestParam("token") String token);
 }

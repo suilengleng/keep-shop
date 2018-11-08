@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import xin.keep.base.BaseApiService;
 import xin.keep.base.BaseRedisService;
@@ -18,6 +19,8 @@ import xin.keep.entity.UserEntity;
 import xin.keep.mq.RegisterMailboxProducer;
 import xin.keep.utils.MD5Util;
 import xin.keep.utils.TokenUtils;
+
+import java.util.Date;
 
 @RestController
 @Slf4j
@@ -52,6 +55,9 @@ public class MemberServiceImpl extends BaseApiService implements MemberService {
         String newPassword = MD5Util.MD5(password);
         System.out.println(newPassword);
         user.setPassword(newPassword);
+        user.setCreated(new Date());
+        user.setUpdated(new Date());
+
         Integer result = memberDao.insertUser(user);
         if(result<=0){
             return setResultError("注册失败！");
@@ -94,7 +100,7 @@ public class MemberServiceImpl extends BaseApiService implements MemberService {
     }
 
     @Override
-    public ResponseBase findByTokenMember(String token) {
+    public ResponseBase findByTokenMember(@RequestParam("token")String token) {
         //1验证参数
         if(StringUtils.isEmpty(token)){
             return setResultError("token不能为空");

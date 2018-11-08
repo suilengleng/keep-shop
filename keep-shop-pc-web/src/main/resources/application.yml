@@ -8,3 +8,12 @@ eureka:
 spring:
   application:
     name: pc-web
+  redis:
+        host: 127.0.0.1
+        password: root
+        port: 6379
+        pool:
+          max-idle: 100
+          min-idle: 1
+          max-active: 1000
+          max-wait: -1

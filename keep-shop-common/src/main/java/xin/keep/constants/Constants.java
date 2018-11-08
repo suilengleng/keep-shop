@@ -22,4 +22,8 @@ public interface Constants {
 	String MEMBER_TOKEN = "MEMBER_TOKEN";
 	// token有效期
 	Long MEMBER_TOKEN_TIME = (long)60*60*24*90;
+
+	//cookie名称
+	String COOKIE_MEMBER_TOKEN = "COOKIE_MEMBER_TOKEN";
+	int COOKIE_MEMBER_TOKEN_TIME = 60*60*24*90;
 }

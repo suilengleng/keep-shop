@@ -13,7 +13,6 @@
         <module>keep-shop-eurekaserver</module>
         <module>keep-shop-member</module>
         <module>keep-shop-message</module>
-        <module>keepshoppcweb</module>
         <module>keep-shop-pc-web</module>
     </modules>
     <packaging>pom</packaging>

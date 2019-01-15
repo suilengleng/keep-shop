@@ -21,6 +21,7 @@ import xin.keep.utils.MD5Util;
 import xin.keep.utils.TokenUtils;
 
 import java.util.Date;
+import java.util.LinkedHashMap;
 
 @RestController
 @Slf4j
@@ -87,16 +88,8 @@ public class MemberServiceImpl extends BaseApiService implements MemberService {
         if(userEntity==null){
             return setResultError("账号密码不正确");
         }
+        return createLogin(userEntity);
 
-        //3如果账号密码正确对应生成token
-        String memberToken = TokenUtils.getMemberToken();
-        //4存放在redis中  key为token  value为userId
-        Integer userId = userEntity.getId();
-        baseRedisService.setString(memberToken,userId+"",Constants.MEMBER_TOKEN_TIME);
-        //5直接返回token
-        JSONObject jsonObject = new JSONObject();
-        jsonObject.put("memberToken",memberToken);
-        return setResultSuccess(jsonObject);
     }
 
     @Override
@@ -118,6 +111,61 @@ public class MemberServiceImpl extends BaseApiService implements MemberService {
         }
         user.setPassword(null);
         return setResultSuccess(user);
+    }
+
+    @Override
+    public ResponseBase findOpenIdUser(@RequestParam("openId") String openId) {
+        //1验证参数
+        if (StringUtils.isEmpty(openId)){
+            return setResultError("openId不能为空");
+        }
+        //2使用openid查询数据库user对象
+        UserEntity openIdUser = memberDao.findOpenIdUser(openId);
+        if(openIdUser==null){
+            return setResultError(Constants.HTTP_RES_CODE_410,"该openId没有关联");
+        }
+        //3自动登录
+        return createLogin(openIdUser);
+    }
+
+    @Override
+    public ResponseBase QQlogin(@RequestBody UserEntity user) {
+        //1验证参数
+        String openId = user.getOpenId();
+        if(StringUtils.isEmpty(openId)){
+            return setResultError("openId不能为空");
+        }
+        //2先进行登入
+        ResponseBase base = login(user);
+        if(!base.getRtnCode().equals(Constants.HTTP_RES_CODE_200)){
+            return base;
+        }
+        //3如果登入成功，数据库修改openid
+        JSONObject data = (JSONObject) base.getData();
+        //4获取token
+        String memberToken = data.getString("memberToken");
+        ResponseBase tokenMember = findByTokenMember(memberToken);
+        if(!tokenMember.getRtnCode().equals(Constants.HTTP_RES_CODE_200)){
+            return tokenMember;
+        }
+        UserEntity userEntity = (UserEntity) tokenMember.getData();
+        Integer userId = userEntity.getId();
+        Integer result = memberDao.updateByOpenIdUser(openId, userId);
+        if(result<=0){
+            return setResultError("QQ关联失败");
+        }
+        return base;
+    }
+    private ResponseBase createLogin(UserEntity userEntity){
+        //3如果账号密码正确对应生成token
+        String memberToken = TokenUtils.getMemberToken();
+        //4存放在redis中  key为token  value为userId
+        Integer userId = userEntity.getId();
+        baseRedisService.setString(memberToken,userId+"",Constants.MEMBER_TOKEN_TIME);
+        //5直接返回token
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("memberToken",memberToken);
+        return setResultSuccess(jsonObject);
     }
 
     private String emailJson(String email){
